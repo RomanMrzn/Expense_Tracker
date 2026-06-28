@@ -8,11 +8,12 @@
 //
 // --- REAL AXIOS CLIENT (paste this when backend is ready) ---
 //
+// frontend/src/lib/axios.js
 import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
-
-const api = axios.create({ baseURL: API_URL });
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL + "/api",
+});
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
@@ -21,23 +22,6 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
-
-api.interceptors.response.use(
-  (res) => res,
-  (err) => {
-    const is401 = err.response?.status === 401;
-    const isAuthRoute = ["/login", "/register"].includes(
-      window.location.pathname,
-    );
-    const isAuthEndpoint = err.config?.url?.includes("/auth/");
-
-    if (is401 && !isAuthRoute && !isAuthEndpoint) {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-    }
-    return Promise.reject(err);
-  },
-);
 
 export default api;
 //
